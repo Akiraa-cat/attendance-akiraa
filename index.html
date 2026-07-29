@@ -540,7 +540,15 @@
             </div>
             <div class="btn-group">
                 <button type="submit" id="submitBtn" class="btn-submit" disabled>Simpan Data</button>
-                <button type="button" id="deleteBtn" class="btn-delete" title="Hapus Data">Hapus</button>
+                <button type="button" id="deleteBtn" class="btn-delete" title="Hapus Data">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                    <span>Hapus</span>
+                </button>
             </div>
             <div class="hint-text" id="hintText">Isi keterangan untuk mengaktifkan tombol simpan</div>
         </form>
@@ -560,7 +568,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqZMd7esNaMJuyAh09sUt6B6w3p34GvXN60W3Cprda65JiadeSfyDegP44aipEjT_0Sw/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzUXqEizS0GdW_DWxh3K6dxh_qSHYoCC21HA35to_n1pYx_IXTqzs8XZnl30NKtmSM8qg/exec";
 
         const MIN_DATE = new Date("2026-07-01");
         const MAX_DATE = new Date("2027-04-17");
@@ -929,11 +937,29 @@
             const monthName = ID_MONTHS[selectedDate.getMonth()];
             const yearNum = selectedDate.getFullYear();
             const dateLabel = `${dayNum} ${monthName} ${yearNum}`;
-
+        
+            const yyyy = yearNum;
+            const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(dayNum).padStart(2, '0');
+            const dateStr = `${yyyy}-${mm}-${dd}`;
+            
+            // Ambil data keterangan yang sedang aktif pada tanggal tersebut
+            const attInfo = monthDataCache.attendance && monthDataCache.attendance[dateStr];
+            const currentDesc = attInfo && attInfo.description ? attInfo.description : "Tidak ada keterangan";
+        
+            const deleteConfirmHtml = `
+                <div class="diff-box">
+                    <div class="diff-label">Tanggal</div>
+                    <div class="diff-val">${dateLabel}</div>
+                    <div class="diff-label">Keterangan yang akan dihapus</div>
+                    <div class="diff-val" style="font-weight:700; color:var(--holiday);">${currentDesc}</div>
+                </div>
+            `;
+        
             showCustomDialog(
                 "Konfirmasi Hapus", 
-                `Apakah Anda yakin ingin menghapus keterangan pada tanggal ${dateLabel}?`, 
-                "", 
+                "Apakah kamu yakin ingin menghapus keterangan absensi ini?", 
+                deleteConfirmHtml, 
                 [
                     { text: "Batal", class: "btn-dialog-secondary", onClick: closeCustomDialog },
                     { text: "Ya, Hapus", class: "btn-dialog-danger", onClick: () => {
