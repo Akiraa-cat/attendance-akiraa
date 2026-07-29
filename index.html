@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Absensi Harian</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-1: #f5f4f1;
+            --bg-2: #ecebe6;
+            --surface: rgba(255, 255, 255, 0.76);
+            --surface-solid: #ffffff;
+            --line: rgba(20, 19, 17, 0.09);
+            --line-strong: rgba(20, 19, 17, 0.16);
+            --ink: #17161a;
+            --ink-soft: #726f6a;
+            --ink-faint: #aba79f;
+            --accent-a: #17161a;
+            --accent-b: #4a4842;
+            --accent-grad: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+            --weekend: #8c887f;
+            --weekend-soft: #eeece6;
+            --holiday: #dc2626;
+            --holiday-soft: #fef2f2;
+            --disabled-bg: #e9e7e2;
+            --disabled-ink: #b7b3aa;
+            --success: #16a34a;
+            --success-soft: #ecfdf5;
+            --radius-lg: 26px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        html, body { height: 100%; }
+
+        body {
+            background: var(--bg-1);
+            color: var(--ink);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px 14px 40px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before, body::after {
+            content: "";
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(70px);
+            z-index: 0;
+            opacity: 0.55;
+            pointer-events: none;
+        }
+        body::before {
+            width: 340px; height: 340px;
+            top: -120px; left: -100px;
+            background: radial-gradient(circle, #d6d3ca, transparent 70%);
+        }
+        body::after {
+            width: 300px; height: 300px;
+            bottom: -80px; right: -90px;
+            background: radial-gradient(circle, #dedbd2, transparent 70%);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 440px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .eyebrow {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--accent-a);
+            margin: 4px 4px 10px;
+        }
+
+        .header-panel {
+            background: var(--surface);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid var(--line-strong);
+            border-radius: var(--radius-lg);
+            padding: 18px 20px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            box-shadow: 0 12px 30px -18px rgba(91, 70, 240, 0.35);
+        }
+
+        .header-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+        #headerDay {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        #headerDate {
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            font-weight: 500;
+        }
+
+        .sheet-badge {
+            flex-shrink: 0;
+            background: var(--accent-grad);
+            color: #fff;
+            padding: 7px 14px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        .calendar-container {
+            background: var(--surface-solid);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            padding: 20px 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 16px 40px -26px rgba(23, 19, 42, 0.25);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .calendar-title-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 6px 8px;
+            margin: -6px -8px;
+            border-radius: 10px;
+            transition: background 0.15s;
+        }
+        .calendar-title-group:hover { background: #f6f4ff; }
+        .calendar-title-group svg { color: var(--ink-faint); }
+
+        .nav-buttons { display: flex; gap: 6px; }
+
+        .nav-btn {
+            background: #f6f4ff;
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--ink);
+            transition: background 0.15s, transform 0.1s;
+        }
+        .nav-btn:hover:not(:disabled) { background: #ece8ff; }
+        .nav-btn:active:not(:disabled) { transform: scale(0.92); }
+        .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        .weekdays-grid, .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            gap: 2px;
+        }
+
+        .weekdays-grid {
+            margin-bottom: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            color: var(--ink-faint);
+        }
+        .weekdays-grid > div.weekend-label { color: var(--weekend); }
+
+        .day-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3px;
+        }
+
+        .day-inner {
+            width: 100%;
+            height: 100%;
+            max-width: 40px;
+            max-height: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.88rem;
+            font-weight: 500;
+            border-radius: 999px;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            color: var(--ink);
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+        }
+
+        .day-cell.weekend .day-inner { color: var(--weekend); font-weight: 600; }
+        .day-cell:not(.disabled):not(.empty) .day-inner:hover { background: #f2effe; }
+        .day-cell.today .day-inner:not(.selected-inner) { box-shadow: inset 0 0 0 1.5px var(--accent-a); }
+
+        .day-inner.selected-inner {
+            background: var(--accent-grad) !important;
+            color: #ffffff !important;
+            font-weight: 700;
+            box-shadow: 0 6px 16px -4px rgba(91, 70, 240, 0.55);
+        }
+
+        .day-cell.holiday .day-inner { color: var(--holiday); font-weight: 700; background: var(--holiday-soft); }
+        .day-cell.holiday .day-inner.selected-inner { color: #fff !important; background: var(--accent-grad) !important; }
+
+        .day-cell.disabled .day-inner { color: var(--disabled-ink); cursor: not-allowed; }
+        .day-cell.empty { pointer-events: none; }
+
+        .dot-container {
+            position: absolute;
+            bottom: 4px;
+            display: flex;
+            gap: 3px;
+        }
+        .indicator-dot { width: 4px; height: 4px; border-radius: 50%; }
+        .dot-data { background: var(--accent-a); }
+        .day-inner.selected-inner .dot-data { background: #ffffff; }
+        .dot-holiday { background: var(--holiday); }
+        .day-inner.selected-inner .dot-holiday { background: #ffffff; }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--line);
+            font-size: 0.72rem;
+            color: var(--ink-soft);
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .legend-dot.weekend-dot { background: var(--weekend); }
+        .legend-dot.holiday-dot { background: var(--holiday); }
+
+        .info-container {
+            background: var(--surface-solid);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            margin-bottom: 14px;
+        }
+
+        .info-title {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent-a);
+            margin-bottom: 6px;
+        }
+
+        .info-content {
+            color: var(--ink);
+            line-height: 1.5;
+            word-break: break-word;
+            font-size: 0.92rem;
+        }
+        .info-content.muted { color: var(--ink-faint); font-style: italic; }
+
+        .holiday-banner {
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--holiday);
+            background: var(--holiday-soft);
+            font-weight: 600;
+            font-size: 0.78rem;
+            padding: 5px 10px;
+            border-radius: 999px;
+        }
+
+        .form-group { margin-bottom: 12px; }
+
+        textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--surface-solid);
+            border: 1px solid var(--line-strong);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--ink);
+            outline: none;
+            resize: vertical;
+            min-height: 88px;
+            line-height: 1.5;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        textarea::placeholder { color: var(--ink-faint); }
+        textarea:focus { border-color: var(--accent-a); box-shadow: 0 0 0 4px rgba(91, 70, 240, 0.10); }
+
+        /* Button Layout Group */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            background: var(--accent-grad);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 15px;
+            font-size: 0.95rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+            box-shadow: 0 10px 24px -12px rgba(91, 70, 240, 0.65);
+        }
+        .btn-submit:active:not(:disabled) { transform: scale(0.98); }
+        .btn-submit:disabled {
+            background: var(--disabled-bg);
+            color: var(--disabled-ink);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-delete {
+            display: none; /* Muncul dinamis jika data sudah ada */
+            background: var(--holiday-soft);
+            color: var(--holiday);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            border-radius: var(--radius-md);
+            padding: 0 18px;
+            font-size: 0.9rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .btn-delete:hover { background: #fee2e2; }
+        .btn-delete:active { transform: scale(0.98); }
+
+        .btn-spinner {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            flex-shrink: 0;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .hint-text {
+            text-align: center;
+            font-size: 0.76rem;
+            color: var(--ink-faint);
+            margin-top: 10px;
+        }
+
+        .custom-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(23, 19, 42, 0.45);
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+            justify-content: center;
+            align-items: center;
+        }
+        .custom-overlay.active { display: flex; }
+
+        .custom-dialog {
+            background: #ffffff;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 22px;
+            padding: 26px 22px;
+            box-shadow: 0 24px 60px -20px rgba(23, 19, 42, 0.4);
+            animation: scaleIn 0.2s ease;
+            margin: 16px;
+        }
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .dialog-icon {
+            display: none;
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            margin: 4px auto 16px;
+            position: relative;
+        }
+        .dialog-icon.success { background: var(--success-soft); color: var(--success); }
+        .dialog-icon.error { background: var(--holiday-soft); color: var(--holiday); }
+        .dialog-icon svg { animation: iconPop 0.3s ease; position: relative; z-index: 1; }
+        @keyframes iconPop { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .confetti {
+            position: absolute;
+            border-radius: 1px;
+            pointer-events: none;
+            animation: confettiPop 0.4s ease;
+        }
+        .dialog-icon.success .confetti { background: var(--success); opacity: 0.55; }
+        .dialog-icon.error .confetti { background: var(--holiday); opacity: 0.5; }
+        .confetti.c1 { width: 5px; height: 5px; top: -8px; left: 6px; transform: rotate(18deg); }
+        .confetti.c2 { width: 4px; height: 4px; top: 4px; right: -10px; border-radius: 50%; }
+        .confetti.c3 { width: 4px; height: 4px; bottom: -6px; left: -8px; border-radius: 50%; }
+        .confetti.c4 { width: 3px; height: 3px; top: -10px; right: 12px; border-radius: 50%; }
+        .confetti.c5 { width: 5px; height: 5px; bottom: -4px; right: -6px; transform: rotate(-24deg); }
+        @keyframes confettiPop { from { transform: scale(0) rotate(0deg); opacity: 0; } to { opacity: 1; } }
+
+        .dialog-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.18rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--ink);
+            text-align: center;
+            letter-spacing: 0.01em;
+        }
+        .dialog-title.success-title { color: var(--success); text-transform: uppercase; }
+        .dialog-title.error-title { color: var(--holiday); text-transform: uppercase; }
+
+        .dialog-message { font-size: 0.92rem; color: var(--ink-soft); margin-bottom: 18px; line-height: 1.5; text-align: center; }
+
+        .diff-box { background: #f6f4ff; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 0.85rem; margin-bottom: 16px; text-align: left; }
+        .diff-label { font-weight: 700; color: var(--accent-a); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
+        .diff-val { color: var(--ink); margin-bottom: 10px; word-break: break-word; }
+
+        .confirm-box { background: var(--holiday-soft); border: 1px solid rgba(220, 38, 38, 0.18); border-radius: var(--radius-sm); padding: 14px 16px; font-size: 0.88rem; line-height: 1.55; color: var(--ink); text-align: left; margin-bottom: 4px; }
+
+        .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .dialog-actions.full-width { display: block; }
+        .dialog-actions.full-width .btn-dialog { width: 100%; }
+
+        .btn-dialog { padding: 11px 18px; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 700; cursor: pointer; border: none; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .btn-dialog-secondary { background: #f2effe; color: var(--ink); }
+        .btn-dialog-primary { background: var(--accent-grad); color: #ffffff; }
+        .btn-dialog-danger { background: var(--holiday); color: #ffffff; border-radius: 999px; padding: 13px 18px; letter-spacing: 0.02em; }
+
+        @media (max-width: 480px) {
+            .custom-overlay { align-items: flex-end; }
+            .custom-dialog { max-width: 100%; margin: 0; border-radius: 22px 22px 0 0; padding: 24px 20px 30px; animation: slideUp 0.25s ease; }
+            @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="eyebrow">Absensi · Harian</div>
+
+        <!-- Header Panel -->
+        <div class="header-panel">
+            <div class="header-main">
+                <span id="headerDay">-</span>
+                <span id="headerDate">-</span>
+            </div>
+            <span id="headerSheet" class="sheet-badge">-</span>
+        </div>
+
+        <!-- Kalender -->
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <div class="calendar-title-group" id="monthYearLabel" title="Klik untuk pilih bulan & tahun">
+                    <span id="monthYearText">Juli 2026</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="nav-buttons">
+                    <button type="button" class="nav-btn" id="prevMonthBtn" title="Bulan Sebelumnya">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <button type="button" class="nav-btn" id="nextMonthBtn" title="Bulan Berikutnya">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="weekdays-grid">
+                <div class="weekend-label">Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div class="weekend-label">Sab</div>
+            </div>
+            <div class="days-grid" id="daysGrid"></div>
+
+            <div class="legend">
+                <div class="legend-item"><span class="legend-dot weekend-dot"></span>Akhir Pekan</div>
+                <div class="legend-item"><span class="legend-dot holiday-dot"></span>Libur Nasional</div>
+            </div>
+        </div>
+
+        <!-- Keterangan -->
+        <div class="info-container">
+            <div class="info-title">Keterangan Terpilih</div>
+            <div id="infoContent" class="info-content muted">Belum ada keterangan, silahkan tambah keterangan</div>
+            <div id="holidayBanner" class="holiday-banner" style="display: none;"></div>
+        </div>
+
+        <!-- Form Keterangan -->
+        <form id="attendanceForm">
+            <div class="form-group">
+                <textarea id="descriptionInput" placeholder="Masukkan keterangan absensi di sini..." required></textarea>
+            </div>
+            <div class="btn-group">
+                <button type="submit" id="submitBtn" class="btn-submit" disabled>Simpan Data</button>
+                <button type="button" id="deleteBtn" class="btn-delete" title="Hapus Data">Hapus</button>
+            </div>
+            <div class="hint-text" id="hintText">Isi keterangan untuk mengaktifkan tombol simpan</div>
+        </form>
+    </div>
+
+    <!-- Custom Alert / Modal / Bottom Sheet -->
+    <div id="customDialogOverlay" class="custom-overlay">
+        <div class="custom-dialog" id="customDialogBox">
+            <div id="dialogIcon" class="dialog-icon"></div>
+            <div id="dialogTitle" class="dialog-title">Notifikasi</div>
+            <div id="dialogMessage" class="dialog-message">Pesan informasi</div>
+            <div id="dialogDiffContainer" style="display: none;"></div>
+            <div class="dialog-actions" id="dialogActions">
+                <button type="button" class="btn-dialog btn-dialog-primary" id="dialogOkBtn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqZMd7esNaMJuyAh09sUt6B6w3p34GvXN60W3Cprda65JiadeSfyDegP44aipEjT_0Sw/exec";
+
+        const MIN_DATE = new Date("2026-07-01");
+        const MAX_DATE = new Date("2027-04-17");
+
+        const ID_MONTHS = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+        const ID_DAYS = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+
+        let currentViewDate = new Date(2026, 6, 1);
+        let selectedDate = new Date(2026, 6, 1);
+        let monthDataCache = { attendance: {}, holidays: {} };
+        let originalHasData = false;
+
+        const headerDay = document.getElementById('headerDay');
+        const headerDate = document.getElementById('headerDate');
+        const headerSheet = document.getElementById('headerSheet');
+        const monthYearLabel = document.getElementById('monthYearLabel');
+        const monthYearText = document.getElementById('monthYearText');
+        const daysGrid = document.getElementById('daysGrid');
+        const prevMonthBtn = document.getElementById('prevMonthBtn');
+        const nextMonthBtn = document.getElementById('nextMonthBtn');
+        const infoContent = document.getElementById('infoContent');
+        const holidayBanner = document.getElementById('holidayBanner');
+        const descriptionInput = document.getElementById('descriptionInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const deleteBtn = document.getElementById('deleteBtn');
+        const hintText = document.getElementById('hintText');
+        const attendanceForm = document.getElementById('attendanceForm');
+
+        const customDialogOverlay = document.getElementById('customDialogOverlay');
+        const dialogIcon = document.getElementById('dialogIcon');
+        const dialogTitle = document.getElementById('dialogTitle');
+        const dialogMessage = document.getElementById('dialogMessage');
+        const dialogDiffContainer = document.getElementById('dialogDiffContainer');
+        const dialogActions = document.getElementById('dialogActions');
+
+        async function initApp() {
+            const today = new Date();
+            if (today >= MIN_DATE && today <= MAX_DATE) {
+                selectedDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                currentViewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            } else {
+                selectedDate = new Date(2026, 6, 1);
+                currentViewDate = new Date(2026, 6, 1);
+            }
+
+            await fetchMonthData(currentViewDate.getFullYear(), currentViewDate.getMonth());
+            renderCalendar();
+            updateHeaderAndInfo();
+        }
+
+        async function fetchMonthData(year, month) {
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=getMonthData&year=${year}&month=${month}`);
+                const result = await res.json();
+                if (result.success && result.data) {
+                    monthDataCache = result.data;
+                } else {
+                    monthDataCache = { attendance: {}, holidays: {} };
+                }
+            } catch (err) {
+                console.error("Gagal mengambil data bulan:", err);
+                monthDataCache = { attendance: {}, holidays: {} };
+            }
+        }
+
+        function renderCalendar() {
+            daysGrid.innerHTML = '';
+            const year = currentViewDate.getFullYear();
+            const month = currentViewDate.getMonth();
+
+            monthYearText.textContent = `${ID_MONTHS[month]} ${year}`;
+
+            const prevMonthCheck = new Date(year, month - 1, 1);
+            prevMonthBtn.disabled = prevMonthCheck < new Date(MIN_DATE.getFullYear(), MIN_DATE.getMonth(), 1);
+            nextMonthBtn.disabled = new Date(year, month + 1, 1) > MAX_DATE;
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const totalDays = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'day-cell empty';
+                daysGrid.appendChild(emptyCell);
+            }
+
+            for (let day = 1; day <= totalDays; day++) {
+                const cellDate = new Date(year, month, day);
+                const dow = cellDate.getDay();
+                const cell = document.createElement('div');
+                cell.className = 'day-cell';
+
+                const yyyy = year;
+                const mm = String(month + 1).padStart(2, '0');
+                const dd = String(day).padStart(2, '0');
+                const dateStr = `${yyyy}-${mm}-${dd}`;
+
+                const isDisabled = cellDate < MIN_DATE || cellDate > MAX_DATE;
+                const isWeekend = (dow === 0 || dow === 6);
+                if (isWeekend) cell.classList.add('weekend');
+
+                const inner = document.createElement('div');
+                inner.className = 'day-inner';
+                inner.textContent = day;
+
+                if (isDisabled) {
+                    cell.classList.add('disabled');
+                    cell.appendChild(inner);
+                } else {
+                    const isHoliday = monthDataCache.holidays && monthDataCache.holidays[dateStr];
+                    if (isHoliday) {
+                        cell.classList.add('holiday');
+                    }
+
+                    const today = new Date();
+                    if (cellDate.toDateString() === today.toDateString()) {
+                        cell.classList.add('today');
+                    }
+
+                    if (cellDate.toDateString() === selectedDate.toDateString()) {
+                        inner.classList.add('selected-inner');
+                    }
+
+                    const hasAttendance = monthDataCache.attendance && monthDataCache.attendance[dateStr] && monthDataCache.attendance[dateStr].hasData;
+                    if (hasAttendance || isHoliday) {
+                        const dotContainer = document.createElement('div');
+                        dotContainer.className = 'dot-container';
+                        if (hasAttendance) {
+                            const dot1 = document.createElement('div');
+                            dot1.className = 'indicator-dot dot-data';
+                            dotContainer.appendChild(dot1);
+                        }
+                        if (isHoliday) {
+                            const dot2 = document.createElement('div');
+                            dot2.className = 'indicator-dot dot-holiday';
+                            dotContainer.appendChild(dot2);
+                        }
+                        inner.appendChild(dotContainer);
+                    }
+
+                    cell.appendChild(inner);
+
+                    cell.addEventListener('click', () => {
+                        selectedDate = new Date(cellDate);
+                        renderCalendar();
+                        updateHeaderAndInfo();
+                    });
+                }
+
+                daysGrid.appendChild(cell);
+            }
+        }
+
+        function updateHeaderAndInfo() {
+            const dayName = ID_DAYS[selectedDate.getDay()];
+            const dayNum = selectedDate.getDate();
+            const monthName = ID_MONTHS[selectedDate.getMonth()];
+            const yearNum = selectedDate.getFullYear();
+
+            headerDay.textContent = dayName;
+            headerDate.textContent = `${dayNum} ${monthName} ${yearNum}`;
+            headerSheet.textContent = monthName;
+
+            const yyyy = yearNum;
+            const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(dayNum).padStart(2, '0');
+            const dateStr = `${yyyy}-${mm}-${dd}`;
+
+            const attInfo = monthDataCache.attendance && monthDataCache.attendance[dateStr];
+
+            if (attInfo && attInfo.hasData) {
+                infoContent.textContent = attInfo.description;
+                infoContent.classList.remove('muted');
+                submitBtn.textContent = "Ubah Data";
+                deleteBtn.style.display = "flex"; // Tampilkan tombol hapus jika data ada
+            } else {
+                infoContent.textContent = "Belum ada keterangan, silahkan tambah keterangan";
+                infoContent.classList.add('muted');
+                submitBtn.textContent = "Simpan Data";
+                deleteBtn.style.display = "none"; // Sembunyikan tombol hapus
+            }
+
+            originalHasData = !!(attInfo && attInfo.hasData);
+            descriptionInput.value = '';
+            descriptionInput.placeholder = originalHasData
+                ? 'Ubah keterangan absensi di sini...'
+                : 'Masukkan keterangan absensi di sini...';
+            updateSubmitState();
+
+            const holidayDesc = monthDataCache.holidays && monthDataCache.holidays[dateStr];
+            if (holidayDesc) {
+                holidayBanner.textContent = `Libur Nasional: ${holidayDesc}`;
+                holidayBanner.style.display = 'inline-flex';
+            } else {
+                holidayBanner.style.display = 'none';
+            }
+        }
+
+        function updateSubmitState() {
+            const val = descriptionInput.value.trim();
+            const hasValue = val.length > 0;
+
+            submitBtn.disabled = !hasValue;
+
+            if (!hasValue) {
+                hintText.textContent = "Isi keterangan untuk mengaktifkan tombol simpan";
+            } else {
+                hintText.textContent = originalHasData ? "Siap memperbarui keterangan" : "Siap menyimpan keterangan baru";
+            }
+        }
+
+        descriptionInput.addEventListener('input', updateSubmitState);
+
+        prevMonthBtn.addEventListener('click', async () => {
+            currentViewDate.setMonth(currentViewDate.getMonth() - 1);
+            await fetchMonthData(currentViewDate.getFullYear(), currentViewDate.getMonth());
+            renderCalendar();
+        });
+
+        nextMonthBtn.addEventListener('click', async () => {
+            currentViewDate.setMonth(currentViewDate.getMonth() + 1);
+            await fetchMonthData(currentViewDate.getFullYear(), currentViewDate.getMonth());
+            renderCalendar();
+        });
+
+        function buildMonthOptionsHtml(year, selectedMonth) {
+            let minMonth = 0;
+            let maxMonth = 11;
+            if (year === MIN_DATE.getFullYear()) minMonth = MIN_DATE.getMonth();
+            if (year === MAX_DATE.getFullYear()) maxMonth = MAX_DATE.getMonth();
+
+            let html = '';
+            ID_MONTHS.forEach((m, idx) => {
+                if (idx < minMonth || idx > maxMonth) return;
+                html += `<option value="${idx}" ${idx === selectedMonth ? 'selected' : ''}>${m}</option>`;
+            });
+            return html;
+        }
+
+        monthYearLabel.addEventListener('click', () => {
+            const minYear = MIN_DATE.getFullYear();
+            const maxYear = MAX_DATE.getFullYear();
+
+            let optionsHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px;">';
+            optionsHtml += '<div><label style="font-size:0.72rem; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.04em;">Bulan</label><select id="pickerMonth" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--line-strong); margin-top:6px; font-family:\'Plus Jakarta Sans\',sans-serif; font-size:0.9rem; background:#fff; color:var(--ink);">';
+            optionsHtml += buildMonthOptionsHtml(currentViewDate.getFullYear(), currentViewDate.getMonth());
+            optionsHtml += '</select></div>';
+
+            optionsHtml += '<div><label style="font-size:0.72rem; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.04em;">Tahun</label><select id="pickerYear" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--line-strong); margin-top:6px; font-family:\'Plus Jakarta Sans\',sans-serif; font-size:0.9rem; background:#fff; color:var(--ink);">';
+            for (let y = minYear; y <= maxYear; y++) {
+                optionsHtml += `<option value="${y}" ${y === currentViewDate.getFullYear() ? 'selected' : ''}>${y}</option>`;
+            }
+            optionsHtml += '</select></div></div>';
+
+            showCustomDialog("Pilih Bulan & Tahun", "", optionsHtml, [
+                { text: "Batal", class: "btn-dialog-secondary", onClick: closeCustomDialog },
+                { text: "Tampilkan", class: "btn-dialog-primary", onClick: async () => {
+                    const m = parseInt(document.getElementById('pickerMonth').value, 10);
+                    const y = parseInt(document.getElementById('pickerYear').value, 10);
+                    currentViewDate = new Date(y, m, 1);
+                    closeCustomDialog();
+                    await fetchMonthData(y, m);
+                    renderCalendar();
+                }}
+            ]);
+
+            const pickerYearEl = document.getElementById('pickerYear');
+            const pickerMonthEl = document.getElementById('pickerMonth');
+            pickerYearEl.addEventListener('change', () => {
+                const y = parseInt(pickerYearEl.value, 10);
+                const prevSelected = parseInt(pickerMonthEl.value, 10);
+                pickerMonthEl.innerHTML = buildMonthOptionsHtml(y, prevSelected);
+            });
+        });
+
+        function successIconHtml() {
+            return `
+                <span class="confetti c1"></span>
+                <span class="confetti c2"></span>
+                <span class="confetti c3"></span>
+                <span class="confetti c4"></span>
+                <span class="confetti c5"></span>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            `;
+        }
+
+        function errorIconHtml() {
+            return `
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
+                    <path d="M12 9v4"></path>
+                    <path d="M12 17h.01"></path>
+                </svg>
+            `;
+        }
+
+        function showCustomDialog(title, message, customHtml = "", actions = [], iconType = null) {
+            dialogTitle.textContent = title;
+            dialogTitle.className = 'dialog-title' + (iconType === 'success' ? ' success-title' : iconType === 'error' ? ' error-title' : '');
+            dialogMessage.textContent = message;
+            dialogMessage.style.display = message ? 'block' : 'none';
+
+            if (iconType === 'success') {
+                dialogIcon.className = 'dialog-icon success';
+                dialogIcon.innerHTML = successIconHtml();
+                dialogIcon.style.display = 'flex';
+            } else if (iconType === 'error') {
+                dialogIcon.className = 'dialog-icon error';
+                dialogIcon.innerHTML = errorIconHtml();
+                dialogIcon.style.display = 'flex';
+            } else {
+                dialogIcon.style.display = 'none';
+                dialogIcon.innerHTML = '';
+            }
+
+            if (customHtml) {
+                dialogDiffContainer.innerHTML = customHtml;
+                dialogDiffContainer.style.display = 'block';
+            } else {
+                dialogDiffContainer.style.display = 'none';
+            }
+
+            dialogActions.innerHTML = '';
+            dialogActions.className = 'dialog-actions';
+
+            if (actions.length === 0) {
+                const okBtn = document.createElement('button');
+                okBtn.type = 'button';
+                if (iconType === 'success') {
+                    okBtn.className = 'btn-dialog btn-dialog-primary';
+                    okBtn.textContent = 'Okeii';
+                    dialogActions.classList.add('full-width');
+                } else if (iconType === 'error') {
+                    okBtn.className = 'btn-dialog btn-dialog-danger';
+                    okBtn.textContent = 'COBA LAGI';
+                    dialogActions.classList.add('full-width');
+                } else {
+                    okBtn.className = 'btn-dialog btn-dialog-primary';
+                    okBtn.textContent = 'OK';
+                }
+                okBtn.onclick = closeCustomDialog;
+                dialogActions.appendChild(okBtn);
+            } else {
+                actions.forEach(act => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = `btn-dialog ${act.class || 'btn-dialog-primary'}`;
+                    btn.textContent = act.text;
+                    btn.onclick = act.onClick;
+                    dialogActions.appendChild(btn);
+                });
+            }
+
+            customDialogOverlay.classList.add('active');
+        }
+
+        function closeCustomDialog() {
+            customDialogOverlay.classList.remove('active');
+        }
+
+        // Event Handler Tombol Hapus
+        deleteBtn.addEventListener('click', () => {
+            const dayNum = selectedDate.getDate();
+            const monthName = ID_MONTHS[selectedDate.getMonth()];
+            const yearNum = selectedDate.getFullYear();
+            const dateLabel = `${dayNum} ${monthName} ${yearNum}`;
+
+            showCustomDialog(
+                "Konfirmasi Hapus", 
+                `Apakah Anda yakin ingin menghapus keterangan pada tanggal ${dateLabel}?`, 
+                "", 
+                [
+                    { text: "Batal", class: "btn-dialog-secondary", onClick: closeCustomDialog },
+                    { text: "Ya, Hapus", class: "btn-dialog-danger", onClick: () => {
+                        closeCustomDialog();
+                        executeDeleteData();
+                    }}
+                ]
+            );
+        });
+
+        async function executeDeleteData() {
+            const yyyy = selectedDate.getFullYear();
+            const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(selectedDate.getDate()).padStart(2, '0');
+            const dateVal = `${yyyy}-${mm}-${dd}`;
+
+            deleteBtn.disabled = true;
+            const prevText = deleteBtn.textContent;
+            deleteBtn.textContent = "Menghapus...";
+
+            try {
+                const payload = {
+                    date: dateVal,
+                    action: "delete"
+                };
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = prevText;
+
+                if (result.success) {
+                    showCustomDialog("Terhapus!", result.message, "", [], 'success');
+                    await fetchMonthData(currentViewDate.getFullYear(), currentViewDate.getMonth());
+                    renderCalendar();
+                    updateHeaderAndInfo();
+                } else {
+                    showCustomDialog("Gagal", result.message, "", [], 'error');
+                }
+            } catch (err) {
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = prevText;
+                showCustomDialog("Kesalahan", "Gagal terhubung ke server.", "", [], 'error');
+            }
+        }
+
+        attendanceForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (submitBtn.disabled) return;
+
+            const yyyy = selectedDate.getFullYear();
+            const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(selectedDate.getDate()).padStart(2, '0');
+            const dateStr = `${yyyy}-${mm}-${dd}`;
+            const attInfo = monthDataCache.attendance && monthDataCache.attendance[dateStr];
+            const descVal = descriptionInput.value.trim();
+
+            const dow = selectedDate.getDay();
+            const isWeekend = (dow === 0 || dow === 6);
+            const holidayName = monthDataCache.holidays && monthDataCache.holidays[dateStr];
+
+            if (isWeekend || holidayName) {
+                const dayNum = selectedDate.getDate();
+                const monthName = ID_MONTHS[selectedDate.getMonth()];
+                const yearNum = selectedDate.getFullYear();
+                const dateLabel = `${dayNum} ${monthName} ${yearNum}`;
+                const reasonText = holidayName
+                    ? `Hari Libur Nasional ${holidayName}`
+                    : (dow === 0 ? 'Hari Minggu' : 'Hari Sabtu');
+
+                const confirmHtml = `
+                    <div class="confirm-box">
+                        Hari yang kamu pilih <strong>(${dateLabel})</strong> merupakan <span style="color:var(--holiday); font-weight:800;">${reasonText}</span>, Apakah kamu yakin ingin mengisi data keterangan?
+                    </div>
+                `;
+
+                showCustomDialog("Konfirmasi Tanggal", "", confirmHtml, [
+                    { text: "Batal", class: "btn-dialog-secondary", onClick: closeCustomDialog },
+                    { text: "Ya, Lanjutkan", class: "btn-dialog-primary", onClick: () => {
+                        closeCustomDialog();
+                        proceedToSave(attInfo, descVal);
+                    }}
+                ]);
+                return;
+            }
+
+            proceedToSave(attInfo, descVal);
+        });
+
+        function proceedToSave(attInfo, descVal) {
+            if (attInfo && attInfo.hasData) {
+                const oldDescText = attInfo.description && attInfo.description.trim() !== "" ? attInfo.description : "Belum ada data";
+                const diffHtml = `
+                    <div class="diff-box">
+                        <div class="diff-label">Keterangan Sebelumnya</div>
+                        <div class="diff-val">${oldDescText}</div>
+                        <div class="diff-label">Keterangan Baru</div>
+                        <div class="diff-val" style="font-weight:700;">${descVal}</div>
+                    </div>
+                `;
+                showCustomDialog("Konfirmasi Timpa Data", "Data pada tanggal tersebut sudah terisi. Apakah Anda ingin mengubahnya?", diffHtml, [
+                    { text: "Batal", class: "btn-dialog-secondary", onClick: closeCustomDialog },
+                    { text: "Ubah Data", class: "btn-dialog-primary", onClick: () => {
+                        closeCustomDialog();
+                        submitData(true);
+                    }}
+                ]);
+            } else {
+                submitData(false);
+            }
+        }
+
+        async function submitData(overwriteFlag = false) {
+            const yyyy = selectedDate.getFullYear();
+            const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(selectedDate.getDate()).padStart(2, '0');
+            const dateVal = `${yyyy}-${mm}-${dd}`;
+
+            const descVal = descriptionInput.value.trim();
+            if (!descVal) {
+                showCustomDialog("Peringatan", "Keterangan wajib diisi sebelum menyimpan.");
+                return;
+            }
+
+            submitBtn.disabled = true;
+            const prevLabel = submitBtn.textContent;
+            submitBtn.innerHTML = '<span class="btn-spinner"></span><span>Menyimpan...</span>';
+
+            try {
+                const payload = {
+                    date: dateVal,
+                    description: descVal,
+                    overwrite: overwriteFlag
+                };
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showCustomDialog("Success!", result.message, "", [], 'success');
+                    await fetchMonthData(currentViewDate.getFullYear(), currentViewDate.getMonth());
+                    renderCalendar();
+                    updateHeaderAndInfo();
+                } else {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = prevLabel;
+                    if (result.overwrite) {
+                        const oldDescText = result.oldDescription && result.oldDescription.trim() !== "" ? result.oldDescription : "Belum ada data";
+                        const newDescText = result.newDescription || descVal;
+
+                        const diffHtml = `
+                            <div class="diff-box">
+                                <div class="diff-label">Keterangan Sebelumnya</div>
+                                <div class="diff-val">${oldDescText}</div>
+                                <div class="diff-label">Keterangan Baru</div>
+                                <div class="diff-val" style="font-weight:700;">${newDescText}</div>
+                            </div>
+                        `;
+                        showCustomDialog("Konfirmasi Timpa Data", "Data pada tanggal tersebut sudah terisi. Apakah Anda ingin mengubahnya?", diffHtml, [
+                            { text: "Batal", class: "btn-dialog-secondary", onClick: closeCustomDialog },
+                            { text: "Ubah Data", class: "btn-dialog-primary", onClick: () => {
+                                closeCustomDialog();
+                                submitData(true);
+                            }}
+                        ]);
+                    } else {
+                        showCustomDialog("Oh No...", result.message, "", [], 'error');
+                    }
+                }
+            } catch (err) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = prevLabel;
+                updateSubmitState();
+                showCustomDialog("Oh No...", "Gagal terhubung ke server.", "", [], 'error');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
