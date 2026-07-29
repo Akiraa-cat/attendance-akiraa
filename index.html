@@ -477,6 +477,17 @@
         .btn-dialog-primary { background: var(--accent-grad); color: #ffffff; }
         .btn-dialog-danger { background: var(--holiday); color: #ffffff; border-radius: 999px; padding: 13px 18px; letter-spacing: 0.02em; }
 
+        .day-inner.missing-data {
+        background: #f97316 !important; /* Warna Oranye */
+        color: #ffffff !important;
+        font-weight: 700;
+        box-shadow: 0 6px 16px -4px rgba(249, 115, 22, 0.45);
+        }
+        .day-inner.missing-data .dot-container .dot-data,
+        .day-inner.missing-data .dot-container .dot-holiday {
+            background: #ffffff !important;
+        }
+        
         @media (max-width: 480px) {
             .custom-overlay { align-items: flex-end; }
             .custom-dialog { max-width: 100%; margin: 0; border-radius: 22px 22px 0 0; padding: 24px 20px 30px; animation: slideUp 0.25s ease; }
@@ -686,15 +697,25 @@
                     }
 
                     const today = new Date();
+                    const normalizedCellDate = new Date(cellDate.getFullYear(), cellDate.getMonth(), cellDate.getDate());
+                    const normalizedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
                     if (cellDate.toDateString() === today.toDateString()) {
                         cell.classList.add('today');
                     }
 
+                    const isPastOrToday = normalizedCellDate <= normalizedToday;
+                    const hasAttendance = monthDataCache.attendance && monthDataCache.attendance[dateStr] && monthDataCache.attendance[dateStr].hasData;
+                    
+                    // Logika: <= today, bukan akhir pekan, bukan libur, dan belum isi data
+                    const isMissingData = isPastOrToday && !isWeekend && !isHoliday && !hasAttendance;
+
                     if (cellDate.toDateString() === selectedDate.toDateString()) {
                         inner.classList.add('selected-inner');
+                    } else if (isMissingData) {
+                        inner.classList.add('missing-data');
                     }
 
-                    const hasAttendance = monthDataCache.attendance && monthDataCache.attendance[dateStr] && monthDataCache.attendance[dateStr].hasData;
                     if (hasAttendance || isHoliday) {
                         const dotContainer = document.createElement('div');
                         dotContainer.className = 'dot-container';
