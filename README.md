@@ -34,3 +34,6 @@ Panduan singkat
 
 5. Selesai
    Setelah frontend dan backend terhubung, aplikasi siap digunakan.
+
+Catatan:
+Ubah username pada index.html line 523
