@@ -179,6 +179,25 @@
         .nav-btn:active:not(:disabled) { transform: scale(0.92); }
         .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
+        /* Tombol Navigasi Statistik di Header */
+        .btn-stats {
+            background: #f2effe;
+            color: var(--ink);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 7px 14px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.15s, transform 0.1s;
+            flex-shrink: 0;
+        }
+        .btn-stats:hover { background: #ece8ff; }
+        .btn-stats:active { transform: scale(0.95); }
+
         .weekdays-grid, .days-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -507,7 +526,14 @@
                 <span id="headerDay">-</span>
                 <span id="headerDate">-</span>
             </div>
-            <span id="headerSheet" class="sheet-badge">-</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <!-- Tombol Menuju Halaman Statistik -->
+                <a href="stats.html" class="btn-stats" title="Lihat Statistik & Dashboard">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    <span>Statistik</span>
+                </a>
+                <span id="headerSheet" class="sheet-badge">-</span>
+            </div>
         </div>
 
         <!-- Kalender -->
@@ -581,9 +607,8 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzUXqEizS0GdW_DWxh3K6dxh_qSHYoCC21HA35to_n1pYx_IXTqzs8XZnl30NKtmSM8qg/exec";
-
-        const MIN_DATE = new Date("2026-07-01");
+        const SCRIPT_URL = "/api/proxy";
+        const MIN_DATE = new Date("2026-06-30");
         const MAX_DATE = new Date("2027-04-17");
 
         const ID_MONTHS = [
@@ -622,7 +647,28 @@
 
         async function initApp() {
             const today = new Date();
-            if (today >= MIN_DATE && today <= MAX_DATE) {
+            
+            // Cek apakah ada parameter 'date' di URL (misal: index.html?date=2026-07-06)
+            const urlParams = new URLSearchParams(window.location.search);
+            const dateParam = urlParams.get('date');
+
+            if (dateParam) {
+                const parts = dateParam.split('-');
+                if (parts.length === 3) {
+                    const pYear = parseInt(parts[0], 10);
+                    const pMonth = parseInt(parts[1], 10) - 1;
+                    const pDay = parseInt(parts[2], 10);
+                    const targetDate = new Date(pYear, pMonth, pDay);
+
+                    if (targetDate >= MIN_DATE && targetDate <= MAX_DATE) {
+                        selectedDate = targetDate;
+                        currentViewDate = new Date(pYear, pMonth, 1);
+                    } else {
+                        selectedDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                        currentViewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    }
+                }
+            } else if (today >= MIN_DATE && today <= MAX_DATE) {
                 selectedDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
                 currentViewDate = new Date(today.getFullYear(), today.getMonth(), 1);
             } else {
