@@ -6,7 +6,7 @@ Panduan singkat
    - code .
 
 2. Siapkan Google Apps Script
-   - Buat spreadsheet baru di Google Drive
+   - Buat spreadsheet baru di Google Sheet atau gunakan yang sudah ada
    - Buka Extensions > Apps Script
    - Hapus isi file Code.gs
    - Salin isi Code.gs dari repository
