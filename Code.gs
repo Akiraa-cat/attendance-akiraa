@@ -122,9 +122,14 @@ function getMonthAttendanceData(year, month) {
 
           if (y === year && cellDate.getMonth() === month) {
             const descStr = cellDesc !== null && cellDesc !== undefined ? cellDesc.toString().trim() : "";
+            
+            // Ambil waktu update terakhir dari Script Properties secara tersembunyi
+            const updatedStr = PropertiesService.getScriptProperties().getProperty("UPDATED_" + dateString) || "";
+
             attendanceMap[dateString] = {
               hasData: descStr !== "",
-              description: descStr
+              description: descStr,
+              updatedAt: updatedStr
             };
           }
         }
@@ -207,6 +212,10 @@ function submitAttendance(dateStr, description, overwrite) {
 
     descCell.setValue(description);
 
+    // Simpan waktu pembaruan terakhir ke Script Properties (tersembunyi, tanpa tambah kolom sheet)
+    const formattedTime = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
+    PropertiesService.getScriptProperties().setProperty("UPDATED_" + dateStr, formattedTime);
+
     return { 
       success: true, 
       message: "Data absensi berhasil disimpan.",
@@ -239,6 +248,9 @@ function deleteAttendance(dateStr) {
     // Kosongkan kolom C (Keterangan) pada baris tersebut
     const descCell = sheet.getRange(rowIndex, 3);
     descCell.setValue("");
+
+    // Hapus data waktu update di properties
+    PropertiesService.getScriptProperties().deleteProperty("UPDATED_" + dateStr);
 
     return { 
       success: true, 
