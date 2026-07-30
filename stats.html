@@ -457,13 +457,13 @@
             </div>
             <!-- Label Hari (Senin - Minggu) -->
             <div class="heatmap-weekdays">
+                <div>MIN</div>
                 <div>SEN</div>
                 <div>SEL</div>
                 <div>RAB</div>
                 <div>KAM</div>
                 <div>JUM</div>
                 <div>SAB</div>
-                <div>MIN</div>
             </div>
             <div class="heatmap-grid" id="heatmapGrid">
                 <!-- Diisi via JS -->
@@ -530,7 +530,7 @@
             const holidaysMap = data.holidays || {};
 
             // Penyesuaian indeks hari Senin sebagai awal minggu (0 = Senin, 6 = Minggu)
-            const firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7;
+            const firstDayIndex = new Date(year, month, 1).getDay();
             
             // Padding untuk hari dari bulan sebelumnya di baris pertama
             for (let i = 0; i < firstDayIndex; i++) {
