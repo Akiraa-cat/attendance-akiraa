@@ -22,10 +22,15 @@ Panduan singkat
    - Deploy dan lanjutkan proses authorize jika diminta
    - Salin URL hasil deploy yang berakhir dengan /exec
 
-4. Konfigurasi Vercel
+4. Deploy ke Vercel
    - Pastikan file proxy tersedia di folder api/proxy.js
-   - Set environment variable SCRIPT_URL dengan URL Apps Script yang sudah didapat
-   - Push perubahan ke GitHub lalu lakukan redeploy di Vercel
+   - Push perubahan ke GitHub
+   - Buka https://vercel.com, lalu login ke akun Anda
+   - Klik Add New > Project
+   - Pilih repository yang sudah dihubungkan ke GitHub lalu klik Import
+   - Di bagian form yang terbuka terdapat "Environment Variables"
+   - Tambahkan variabel key = "SCRIPT_URL" dengan value = URL Apps Script yang sudah disalin tadi
+   - Lalu klik deploy
 
 5. Selesai
    Setelah frontend dan backend terhubung, aplikasi siap digunakan.
