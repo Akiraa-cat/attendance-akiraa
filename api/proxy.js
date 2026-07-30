@@ -6,7 +6,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Ambil query string jika ada (misal: ?action=getMonthData&year=2026&month=6)
+        // Ambil query string jika ada (misal: ?action=getMonthData...)
         const urlParams = req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
         const targetUrl = SCRIPT_URL + urlParams;
 
@@ -15,9 +15,11 @@ export default async function handler(req, res) {
             headers: { 'Content-Type': 'application/json' }
         };
 
-        // Jika method POST (untuk simpan/ubah/hapus data), teruskan body-nya
+        // Jika method POST, pastikan req.body diteruskan ke Google Apps Script
         if (req.method === 'POST') {
-            fetchOptions.body = JSON.stringify(req.body);
+            // Tangani body baik dalam bentuk string maupun object
+            const bodyData = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+            fetchOptions.body = bodyData;
         }
 
         const response = await fetch(targetUrl, fetchOptions);
