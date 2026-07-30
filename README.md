@@ -1,9 +1,9 @@
 Panduan singkat
 
 1. Clone repository
-   git clone https://github.com/Akiraa-cat/attendance-akiraa.git
-   cd attendance-akiraa
-   code .
+   - git clone https://github.com/Akiraa-cat/attendance-akiraa.git
+   - cd attendance-akiraa
+   - code .
 
 2. Siapkan Google Apps Script
    - Buat spreadsheet baru di Google Drive
