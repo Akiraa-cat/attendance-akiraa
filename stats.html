@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Statistik Absensi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconify Script -->
+    <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+
+    <style>
+        :root {
+            --bg-1: #f5f4f1;
+            --surface: rgba(255, 255, 255, 0.76);
+            --surface-solid: #ffffff;
+            --line: rgba(20, 19, 17, 0.09);
+            --line-strong: rgba(20, 19, 17, 0.16);
+            --ink: #17161a;
+            --ink-soft: #726f6a;
+            --ink-faint: #aba79f;
+            --accent-a: #17161a;
+            --accent-b: #4a4842;
+            --accent-grad: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+            --success: #16a34a;
+            --success-soft: #ecfdf5;
+            --warning: #f97316;
+            --warning-soft: #fff7ed;
+            --holiday: #dc2626;
+            --holiday-soft: #fef2f2;
+            --radius-lg: 26px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: var(--bg-1);
+            color: var(--ink);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px 14px 40px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 440px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Top Bar dengan Back Button & Title */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .back-btn {
+            background: var(--surface-solid);
+            border: 1px solid var(--line-strong);
+            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink);
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            box-shadow: 0 4px 12px -6px rgba(23, 19, 42, 0.15);
+            flex-shrink: 0;
+        }
+        .back-btn:hover { background: #f6f4ff; }
+        .back-btn:active { transform: scale(0.92); }
+
+        .eyebrow-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .eyebrow-sub {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--ink-faint);
+        }
+
+        .eyebrow-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        /* Dashboard Header Card */
+        .dashboard-card {
+            background: var(--surface-solid);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            padding: 22px 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 16px 40px -26px rgba(23, 19, 42, 0.25);
+            text-align: center;
+        }
+
+        .progress-ring-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 16px;
+        }
+
+        .progress-ring-container svg {
+            transform: rotate(-90deg);
+            width: 120px;
+            height: 120px;
+        }
+
+        .progress-ring-circle-bg {
+            fill: none;
+            stroke: var(--bg-1);
+            stroke-width: 10;
+        }
+
+        .progress-ring-circle {
+            fill: none;
+            stroke: var(--success);
+            stroke-width: 10;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.6s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .dashboard-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .dashboard-subtitle {
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            margin-bottom: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            border-top: 1px solid var(--line);
+            padding-top: 14px;
+        }
+
+        .stat-box {
+            background: var(--bg-1);
+            border-radius: var(--radius-sm);
+            padding: 10px 6px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 0.68rem;
+            color: var(--ink-soft);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Section Container */
+        .section-container {
+            background: var(--surface-solid);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 10px 30px -20px rgba(23, 19, 42, 0.15);
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.92rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--ink);
+        }
+
+        .section-title-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Missing Attendance List */
+        .missing-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .missing-item {
+            background: var(--warning-soft);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 11px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .missing-item:hover { background: #ffedd5; }
+        .missing-item:active { transform: scale(0.98); }
+
+        .missing-date-info {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #9a3412;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .missing-action-btn {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #c2410c;
+            background: #fff;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .empty-missing {
+            text-align: center;
+            color: var(--success);
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 14px;
+            background: var(--success-soft);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        /* Heatmap Mini Grid */
+        .heatmap-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--ink-faint);
+            margin-bottom: 8px;
+            letter-spacing: 0.04em;
+        }
+
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            text-align: center;
+        }
+
+        .heatmap-cell {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: transform 0.1s;
+        }
+        
+        /* Skema Warna Heatmap Status */
+        .heatmap-filled { background: #dcfce7; color: #166534; font-weight: 700; } /* Hijau lembut */
+        .heatmap-missing { background: #ffedd5; color: #c2410c; font-weight: 700; } /* Oranye lembut */
+        .heatmap-weekend { background: transparent; color: var(--ink-faint); } /* Kosong/Abu transparan */
+        .heatmap-holiday { background: var(--holiday-soft); color: var(--holiday); font-weight: 700; } /* Merah lembut */
+        .heatmap-future { background: transparent; color: var(--ink-faint); opacity: 0.4; }
+        .heatmap-other-month { background: transparent; color: transparent; pointer-events: none; }
+
+        /* Timeline Riwayat Aktivitas */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.85rem;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--line);
+        }
+        .history-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+        .history-icon-wrapper {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #f2effe;
+            color: #5b46f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .history-content { flex: 1; color: var(--ink); line-height: 1.4; }
+        .history-date { font-size: 0.72rem; color: var(--ink-faint); margin-top: 2px; }
+
+        /* Insight Box */
+        .insight-box {
+            background: #f6f4ff;
+            border: 1px solid rgba(91, 70, 240, 0.2);
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            margin-bottom: 14px;
+        }
+        .insight-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #5b46f0;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .insight-text {
+            font-size: 0.88rem;
+            color: var(--ink);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Top Bar dengan Tombol Back Chevron dan Judul -->
+        <div class="top-bar">
+            <a href="index.html" class="back-btn" title="Kembali">
+                <iconify-icon icon="solar:alt-arrow-left-linear" width="22" height="22"></iconify-icon>
+            </a>
+            <div class="eyebrow-group">
+                <span class="eyebrow-sub">Analisis & Ringkasan</span>
+                <span class="eyebrow-title">Statistik Absensi</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Progress Card -->
+        <div class="dashboard-card">
+            <div class="progress-ring-container">
+                <svg>
+                    <circle class="progress-ring-circle-bg" cx="60" cy="60" r="50"></circle>
+                    <circle class="progress-ring-circle" id="progressCircle" cx="60" cy="60" r="50" stroke-dasharray="314" stroke-dashoffset="314"></circle>
+                </svg>
+                <div class="progress-text" id="progressPercent">0%</div>
+            </div>
+            <div class="dashboard-title" id="monthNameTitle">Bulan Juli 2026</div>
+            <div class="dashboard-subtitle" id="attendanceSummaryText">Memuat data absensi...</div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value" id="statFilled">0</div>
+                    <div class="stat-label">Terisi</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="statMissing" style="color: var(--warning);">0</div>
+                    <div class="stat-label">Belum Diisi</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="statWorkingDays">0</div>
+                    <div class="stat-label">Hari Kerja</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insight Otomatis -->
+        <div class="insight-box">
+            <div class="insight-title">
+                <iconify-icon icon="solar:info-circle-bold" width="18" height="18"></iconify-icon>
+                Insight Bulan Ini
+            </div>
+            <div class="insight-text" id="insightContentText">
+                Menganalisis pola kehadiran dan kelengkapan absensi kamu...
+            </div>
+        </div>
+
+        <!-- Missing Attendance List (Prioritas #2) -->
+        <div class="section-container">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <iconify-icon icon="solar:danger-triangle-bold" width="18" height="18" style="color: var(--warning);"></iconify-icon>
+                    <span>Tanggal Belum Diisi</span>
+                </div>
+                <span id="missingCountBadge" style="font-size:0.75rem; background:var(--warning-soft); color:var(--warning); padding:2px 8px; border-radius:999px; font-weight:700;">0 hari</span>
+            </div>
+            <div class="missing-list" id="missingListContainer">
+                <div class="empty-missing">
+                    <iconify-icon icon="solar:check-circle-bold" width="18" height="18"></iconify-icon>
+                    Keren! Semua absensi hari kerja sudah terisi lengkap.
+                </div>
+            </div>
+        </div>
+
+        <!-- Heatmap Kalender Bulan Ini -->
+        <div class="section-container">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <iconify-icon icon="solar:calendar-minimalistic-bold" width="18" height="18"></iconify-icon>
+                    <span>Heatmap Kehadiran</span>
+                </div>
+            </div>
+            <!-- Label Hari (Senin - Minggu) -->
+            <div class="heatmap-weekdays">
+                <div>SEN</div>
+                <div>SEL</div>
+                <div>RAB</div>
+                <div>KAM</div>
+                <div>JUM</div>
+                <div>SAB</div>
+                <div>MIN</div>
+            </div>
+            <div class="heatmap-grid" id="heatmapGrid">
+                <!-- Diisi via JS -->
+            </div>
+        </div>
+
+        <!-- Riwayat Aktivitas Terakhir (Prioritas #4) -->
+        <div class="section-container">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <iconify-icon icon="solar:history-bold" width="18" height="18"></iconify-icon>
+                    <span>Riwayat Aktivitas</span>
+                </div>
+            </div>
+            <div class="history-list" id="historyListContainer">
+                <div class="history-item">
+                    <div class="history-icon-wrapper">
+                        <iconify-icon icon="solar:document-text-bold" width="14" height="14"></iconify-icon>
+                    </div>
+                    <div class="history-content">
+                        <div>Membuka halaman statistik dashboard.</div>
+                        <div class="history-date">Baru saja</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "/api/proxy";
+        const ID_MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+        async function initStats() {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
+
+            document.getElementById('monthNameTitle').textContent = `Bulan ${ID_MONTHS[currentMonth]} ${currentYear}`;
+
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=getMonthData&year=${currentYear}&month=${currentMonth}`);
+                const result = await res.json();
+                
+                if (result.success && result.data) {
+                    processDashboardData(result.data, currentYear, currentMonth);
+                }
+            } catch (err) {
+                console.error("Gagal memuat statistik:", err);
+                processDashboardData({ attendance: {}, holidays: {} }, currentYear, currentMonth);
+            }
+        }
+
+        function processDashboardData(data, year, month) {
+            const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const normalizedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+            let workingDaysCount = 0;
+            let filledCount = 0;
+            let missingDays = [];
+            let heatmapHtml = '';
+
+            const attendanceMap = data.attendance || {};
+            const holidaysMap = data.holidays || {};
+
+            // Penyesuaian indeks hari Senin sebagai awal minggu (0 = Senin, 6 = Minggu)
+            const firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7;
+            
+            // Padding untuk hari dari bulan sebelumnya di baris pertama
+            for (let i = 0; i < firstDayIndex; i++) {
+                heatmapHtml += `<div class="heatmap-cell heatmap-other-month"></div>`;
+            }
+
+            for (let day = 1; day <= totalDaysInMonth; day++) {
+                const cellDate = new Date(year, month, day);
+                const dow = cellDate.getDay(); // 0 = Minggu, 6 = Sabtu
+                const isWeekend = (dow === 0 || dow === 6);
+                
+                const yyyy = year;
+                const mm = String(month + 1).padStart(2, '0');
+                const dd = String(day).padStart(2, '0');
+                const dateStr = `${yyyy}-${mm}-${dd}`;
+                
+                const isHoliday = holidaysMap[dateStr];
+                const normalizedCell = new Date(year, month, day);
+                const isPastOrToday = normalizedCell <= normalizedToday;
+                const hasData = attendanceMap[dateStr] && attendanceMap[dateStr].hasData;
+
+                let cellClass = 'heatmap-future';
+                let tooltipText = `${day} ${ID_MONTHS[month]} ${year} (Mendatang)`;
+
+                if (isWeekend) {
+                    cellClass = 'heatmap-weekend';
+                    tooltipText = `${day} ${ID_MONTHS[month]} ${year} (Akhir Pekan)`;
+                } else if (isHoliday) {
+                    cellClass = 'heatmap-holiday';
+                    tooltipText = `${day} ${ID_MONTHS[month]} ${year} - Libur: ${isHoliday}`;
+                } else if (isPastOrToday) {
+                    if (hasData) {
+                        cellClass = 'heatmap-filled';
+                        filledCount++;
+                        workingDaysCount++;
+                        tooltipText = `${day} ${ID_MONTHS[month]} ${year} (Terisi)`;
+                    } else {
+                        cellClass = 'heatmap-missing';
+                        missingDays.push({ dateStr, day, monthName: ID_MONTHS[month] });
+                        workingDaysCount++;
+                        tooltipText = `${day} ${ID_MONTHS[month]} ${year} (Belum Diisi)`;
+                    }
+                } else {
+                    workingDaysCount++;
+                }
+
+                heatmapHtml += `<div class="heatmap-cell ${cellClass}" title="${tooltipText}">${day}</div>`;
+            }
+
+            document.getElementById('heatmapGrid').innerHTML = heatmapHtml;
+            
+            const completionRate = workingDaysCount > 0 ? Math.round((filledCount / workingDaysCount) * 100) : 100;
+            
+            const circle = document.getElementById('progressCircle');
+            const radius = circle.r.baseVal.value;
+            const circumference = radius * 2 * Math.PI;
+            const offset = circumference - (completionRate / 100) * circumference;
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
+            circle.style.strokeDashoffset = offset;
+
+            document.getElementById('progressPercent').textContent = `${completionRate}%`;
+            document.getElementById('statFilled').textContent = filledCount;
+            document.getElementById('statMissing').textContent = missingDays.length;
+            document.getElementById('statWorkingDays').textContent = workingDaysCount;
+            document.getElementById('attendanceSummaryText').textContent = `${filledCount} dari ${workingDaysCount} hari kerja terisi`;
+
+            const missingContainer = document.getElementById('missingListContainer');
+            document.getElementById('missingCountBadge').textContent = `${missingDays.length} hari`;
+
+            if (missingDays.length > 0) {
+                let missingHtml = '';
+                missingDays.forEach(item => {
+                    missingHtml += `
+                        <div class="missing-item" onclick="window.location.href='index.html?date=${item.dateStr}'">
+                            <div class="missing-date-info">
+                                <iconify-icon icon="solar:calendar-date-bold" width="16" height="16"></iconify-icon>
+                                ${item.day} ${item.monthName} ${year}
+                            </div>
+                            <span class="missing-action-btn">
+                                Lengkapi
+                                <iconify-icon icon="solar:alt-arrow-right-linear" width="12" height="12"></iconify-icon>
+                            </span>
+                        </div>
+                    `;
+                });
+                missingContainer.innerHTML = missingHtml;
+            } else {
+                missingContainer.innerHTML = `
+                    <div class="empty-missing">
+                        <iconify-icon icon="solar:check-circle-bold" width="18" height="18"></iconify-icon>
+                        🎉 Sempurna! Tidak ada absensi yang terlewat bulan ini.
+                    </div>
+                `;
+            }
+
+            const insightText = completionRate >= 90 
+                ? `Luar biasa! Konsistensi pengisian absensi kamu bulan ini sangat tinggi mencapai <strong>${completionRate}%</strong>. Pertahankan kebiasaan baik ini!`
+                : `Masih ada <strong>${missingDays.length} hari kerja</strong> yang belum dilengkapi keterangannya. Yuk segera lengkapi agar rekam jejak absensimu rapi!`;
+            document.getElementById('insightContentText').innerHTML = insightText;
+        }
+
+        window.addEventListener('DOMContentLoaded', initStats);
+    </script>
+</body>
+</html>
