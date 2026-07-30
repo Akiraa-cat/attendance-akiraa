@@ -518,7 +518,10 @@
 <body>
 
     <div class="app-container">
-        <div class="eyebrow">Absensi · Harian</div>
+        <div class="eyebrow" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Absensi · Harian</span>
+            <span>Akiraatsuuu</span>
+        </div>
 
         <!-- Header Panel -->
         <div class="header-panel">
@@ -567,7 +570,10 @@
 
         <!-- Keterangan -->
         <div class="info-container">
-            <div class="info-title">Keterangan Terpilih</div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px;">
+                <div class="info-title" id="infoTitleLabel" style="margin-bottom: 0;">Keterangan</div>
+                <div id="infoLastUpdated" style="font-size: 0.68rem; color: var(--ink-faint); display: none;">Terakhir diubah: -</div>
+            </div>
             <div id="infoContent" class="info-content muted">Belum ada keterangan, silahkan tambah keterangan</div>
             <div id="holidayBanner" class="holiday-banner" style="display: none;"></div>
         </div>
@@ -793,7 +799,7 @@
             }
         }
 
-        function updateHeaderAndInfo() {
+function updateHeaderAndInfo() {
             const dayName = ID_DAYS[selectedDate.getDay()];
             const dayNum = selectedDate.getDate();
             const monthName = ID_MONTHS[selectedDate.getMonth()];
@@ -803,23 +809,36 @@
             headerDate.textContent = `${dayNum} ${monthName} ${yearNum}`;
             headerSheet.textContent = monthName;
 
+            // Update judul bagian keterangan agar dinamis sesuai tanggal yang dipilih
+            document.getElementById('infoTitleLabel').textContent = `Keterangan ${dayNum} ${monthName} ${yearNum}`;
+
             const yyyy = yearNum;
             const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
             const dd = String(dayNum).padStart(2, '0');
             const dateStr = `${yyyy}-${mm}-${dd}`;
 
             const attInfo = monthDataCache.attendance && monthDataCache.attendance[dateStr];
+            const lastUpdatedEl = document.getElementById('infoLastUpdated');
 
             if (attInfo && attInfo.hasData) {
                 infoContent.textContent = attInfo.description;
                 infoContent.classList.remove('muted');
                 submitBtn.textContent = "Ubah Data";
-                deleteBtn.style.display = "flex"; // Tampilkan tombol hapus jika data ada
+                deleteBtn.style.display = "flex";
+
+                // Tampilkan waktu terakhir diubah jika datanya tersedia dari backend
+                if (attInfo.updatedAt) {
+                    lastUpdatedEl.textContent = `Terakhir diubah: ${attInfo.updatedAt}`;
+                    lastUpdatedEl.style.display = 'block';
+                } else {
+                    lastUpdatedEl.style.display = 'none';
+                }
             } else {
                 infoContent.textContent = "Belum ada keterangan, silahkan tambah keterangan";
                 infoContent.classList.add('muted');
                 submitBtn.textContent = "Simpan Data";
-                deleteBtn.style.display = "none"; // Sembunyikan tombol hapus
+                deleteBtn.style.display = "none";
+                lastUpdatedEl.style.display = 'none'; // Sembunyikan jika belum ada data
             }
 
             originalHasData = !!(attInfo && attInfo.hasData);
